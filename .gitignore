@@ -2,3 +2,7 @@
 samples/
 *.pem
 *.pem.pub
+*.tfstate
+*.tfvars
+*.backup
+.terraform/
