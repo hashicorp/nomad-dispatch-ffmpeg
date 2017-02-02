@@ -176,7 +176,7 @@ Assuming Terraform and Nomad are installed locally, we must configure Terraform 
 at `tf/terraform.tfvars`:
 
 ```
-# Configure DataDog API keys
+# Configure Datadog API keys
 datadog_api_key = "1234..."
 datadog_app_key = "5cc7..."
 
@@ -188,7 +188,7 @@ aws_secret_key = "HZFm..."
 client_count = 2
 ```
 
-We are using [DataDog](http://datadoghq.com) to monitor the queue depth of pending jobs.
+We are using [Datadog](http://datadoghq.com) to monitor the queue depth of pending jobs.
 This gives us visibility into how busy our cluster is, and if we need to add more Nomad nodes
 to scale up our processing throughput. We use AWS to spin up a simple Nomad cluster, with a single
 server, and a variable number of clients (defaulting to 1). Once we've setup our variables, we
