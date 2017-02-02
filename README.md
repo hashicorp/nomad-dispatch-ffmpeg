@@ -289,3 +289,11 @@ our AWS instances after launch. In practice, we would use [Packer](https://www.p
 to pre-bake AMIs that are already configured to reduce startup time and the risk
 of partial failures during setup.
 
+# Troubleshooting
+
+These examples use new features of many of the tools. At the time of writing,
+the following versions were used:
+* Terraform v0.8.5
+* Nomad v0.5.4
+* Vagrant v1.9.1
+
