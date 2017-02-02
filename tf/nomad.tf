@@ -115,3 +115,7 @@ resource "aws_instance" "client" {
     }
 }
 
+output "nomad_addr" {
+    value = "http://${aws_instance.server.public_ip}:4646/"
+}
+
