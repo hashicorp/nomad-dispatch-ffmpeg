@@ -25,3 +25,102 @@ Our transcode service is quite simple and ultimately invokes `bin/transcode.sh`.
 
 To test the transcode service, we can either use [Vagrant](https://www.vagrantup.com) locally or [Terraform](https://www.terraform.io) to spin up an AWS cluster.
 
+# Vagrant
+
+Using Vagrant we can setup a local virtual machine to test our transcoding service.
+The provided `Vagrantfile` will setup the VM and register our Nomad job:
+
+```
+$ vagrant up
+Bringing machine 'default' up with 'vmware_fusion' provider...
+==> default: Cloning VMware VM: 'cbednarski/ubuntu-1404'. This can take some time...
+==> default: Checking if box 'cbednarski/ubuntu-1404' is up to date...
+==> default: Verifying vmnet devices are healthy...
+==> default: Preparing network adapters...
+==> default: Starting the VMware VM...
+...
+==> default: nomad start/running, process 14816
+==> default: Running provisioner: file...
+==> default: Running provisioner: shell...
+    default: Running: inline script
+==> default: stdin: is not a tty
+==> default: Job registration successful
+```
+
+At this point, we should have a Vagrant VM running with Nomad setup and our `transcode` job registered.
+We can verify this is the case:
+
+```
+$ vagrant ssh
+...
+
+$ nomad status
+ID         Type   Priority  Status
+transcode  batch  50        running
+
+$ nomad status transcode
+ID            = transcode
+Name          = transcode
+Type          = batch
+Priority      = 50
+Datacenters   = dc1
+Status        = running
+Periodic      = false
+Parameterized = true
+
+Parameterized Job
+Payload           = optional
+Required Metadata = input
+Optional Metadata = profile
+
+Parameterized Job Summary
+Pending  Running  Dead
+0        0        0
+
+No dispatched instances of parameterized job found
+
+```
+
+To attempt transcoding, we can use the provided samples:
+
+```
+$ vagrant ssh
+...
+
+$ cd /vagrant/
+
+$ ./bin/dispatch.sh samples/one.txt
+Input file: http://s3.amazonaws.com/akamai.netstorage/HD_downloads/Orion_SM.mp4
+Dispatched Job ID = transcode/dispatch-1486005726-0d20aa76
+Evaluation ID     = ac7a43be
+Dispatched Job ID = transcode/dispatch-1486005726-6671c576
+Evaluation ID     = ba6cfb02
+
+$ nomad status transcode
+ID            = transcode
+Name          = transcode
+Type          = batch
+Priority      = 50
+Datacenters   = dc1
+Status        = running
+Periodic      = false
+Parameterized = true
+
+Parameterized Job
+Payload           = optional
+Required Metadata = input
+Optional Metadata = profile
+
+Parameterized Job Summary
+Pending  Running  Dead
+0        2        0
+
+Dispatched Jobs
+ID                                      Status
+transcode/dispatch-1486005726-0d20aa76  running
+transcode/dispatch-1486005726-6671c576  running
+
+```
+
+Here we can see that we've dispatched two jobs, both are processing the same input file, one for the "small" profile and one for the "large" profile. We can use the standard Nomad commands to inspect and monitor those jobs, as they are regular batch jobs.
+
