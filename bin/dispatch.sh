@@ -7,9 +7,9 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-# Loop over each line
+# Loop over each line, submitting one job for a small and large profile
 while IFS='' read -r line || [[ -n "$line" ]]; do
     echo "Input file: $line"
-    nomad job dispatch -detach -meta "profile=large" -meta "input=$line" transcode
+    nomad job dispatch -detach -meta "profile=small" -meta "input=$line" transcode
     nomad job dispatch -detach -meta "profile=large" -meta "input=$line" transcode
 done < "$1"
