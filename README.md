@@ -53,6 +53,8 @@ EOH
 
 We need to replace `BUCKET_NAME` with the name of the actual S3 bucket to upload to,
 and `ACCESS_KEY` and `SECRET_KEY` with credentials that have permission to use that bucket.
+
+**Caveats**:
 For the sake of simplicity, we can hard code the credentials, however in a real world scenario
 we would use [Vault](https://www.vaultproject.io) to store the credentials and use Nomad's
 [template integration](https://www.nomadproject.io/docs/job-specification/template.html) to
@@ -275,4 +277,15 @@ Destroy complete! Resources: 19 destroyed.
 ```
 
 Don't forget to delete the output files in S3 to avoid being charged.
+
+**Caveats**:
+Terraform is deploying the Nomad server to be accessible on the Internet with
+an insecure configuration. This makes it easy to demo the dispatch features,
+however in real world usage the Nomad servers should be accessible only via
+VPN or a bastion host.
+
+Additionally, for the sake of simplicity we are using provisioners to configure
+our AWS instances after launch. In practice, we would use [Packer](https://www.packer.io)
+to pre-bake AMIs that are already configured to reduce startup time and the risk
+of partial failures during setup.
 
