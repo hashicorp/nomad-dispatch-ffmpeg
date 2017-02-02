@@ -47,16 +47,25 @@ if [ $MODE == "vagrant" ]; then
     SERVER_ENABLED="true"
     CLIENT_ENABLED="true"
     BOOTSTRAP="1"
+    ADVERTISE='
+advertise {
+    http="127.0.0.1"
+    rpc="127.0.0.1"
+    serf="127.0.0.1"
+}
+'
 elif [ $MODE == "server" ]; then
     BIND="0.0.0.0"
     SERVER_ENABLED="true"
     CLIENT_ENABLED="false"
     BOOTSTRAP="1"
+    ADVERTISE=""
 elif [ $MODE == "client" ]; then
     BIND="127.0.0.1"
     SERVER_ENABLED="false"
     CLIENT_ENABLED="true"
     BOOTSTRAP="0"
+    ADVERTISE=""
 fi
 
 # Create the configuration directory and populate
@@ -75,6 +84,7 @@ client {
 telemetry {
   datadog_address = "127.0.0.1:8125"
 }
+$ADVERTISE
 EOL
 sudo mv /tmp/agent.json /etc/nomad.d/agent.json
 
