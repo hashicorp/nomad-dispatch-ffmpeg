@@ -5,6 +5,7 @@ provider "datadog" {
     app_key = "${var.datadog_app_key}"
 }
 
+# Setup a dashboard for the queue depth of jobs waiting to be scheduled
 resource "datadog_timeboard" "nomad" {
     title = "Nomad queue depth (created via Terraform)"
     description = "Depth of jobs waiting to be scheduled"

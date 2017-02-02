@@ -1,4 +1,5 @@
 
+# Query for the latest AMI of Ubuntu 14.04
 data "aws_ami" "ubuntu" {
   most_recent = true
   filter {
@@ -12,18 +13,22 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
+# Generate a new SSH key for the instances
 resource "null_resource" "keygen" {
     provisioner "local-exec" {
         command = "yes | ssh-keygen -N '' -b 2048 -t rsa -f nomad-key.pem"
     }
 }
 
+# Register our new key pair using the public key
 resource "aws_key_pair" "nomad-key" {
   depends_on = ["null_resource.keygen"]
   key_name = "nomad-key"
   public_key = "${file("nomad-key.pem.pub")}"
 }
 
+# Create a security group that allows all inbound traffic
+# used for the Nomad servers in the public subnet
 resource "aws_security_group" "allow_all" {
   name = "allow_all"
   description = "Allow all inbound traffic"
@@ -44,6 +49,8 @@ resource "aws_security_group" "allow_all" {
   }
 }
 
+# Create a nomad server in the public subnet, this also acts
+# as our bastion host into the rest of the cluster
 resource "aws_instance" "server" {
     ami = "${data.aws_ami.ubuntu.id}"
     instance_type = "c4.large"
@@ -78,6 +85,8 @@ resource "aws_instance" "server" {
     }
 }
 
+# Create any number of nomad clients in the private subnet. They are
+# provisioned using the nomad server as a bastion host.
 resource "aws_instance" "client" {
     count = "${var.client_count}"
     ami = "${data.aws_ami.ubuntu.id}"
@@ -115,6 +124,7 @@ resource "aws_instance" "client" {
     }
 }
 
+# Output the nomad server address to make it easier to setup Nomad
 output "nomad_addr" {
     value = "http://${aws_instance.server.public_ip}:4646/"
 }

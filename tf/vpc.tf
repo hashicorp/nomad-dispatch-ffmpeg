@@ -1,10 +1,12 @@
 
+# Setup AWS to use us-east-1
 provider "aws" {
   region = "us-east-1"
   access_key = "${var.aws_access_key}"
   secret_key = "${var.aws_secret_key}"
 }
 
+# Configure a VPC with a public and private subnet
 module "vpc" {
   source = "github.com/terraform-community-modules/tf_aws_vpc"
   name = "nomad-vpc"
