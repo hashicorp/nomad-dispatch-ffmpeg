@@ -21,7 +21,7 @@ Evaluation ID     = e33db4b6
 Each time we dispatch a parameterized job, we create a new job with a unique ID.
 This is similar to a future or promise in many programming languages, and allows us to track the status of a given invocation.
 
-Our transcode service is ultimately invokes `bin/transcode.sh`. When called, the input file is downloaded, the MD5 is computed, ffmpeg is used to transcode, and the converted output is uploaded to S3 for storage. The transcode script supports a "small" and "large" profile, which convert files to 480p or 720p respectively.
+Our transcode service ultimately invokes `bin/transcode.sh`. When it is called, the input file is downloaded, the MD5 is computed, ffmpeg is used to transcode, and the converted output is uploaded to S3 for storage. The transcode script supports a "small" and "large" profile, which convert files to 480p or 720p respectively.
 
 To test the transcode service, we can either use [Vagrant](https://www.vagrantup.com) locally or [Terraform](https://www.terraform.io) to spin up an AWS cluster.
 
