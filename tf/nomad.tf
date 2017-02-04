@@ -13,16 +13,8 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
-# Generate a new SSH key for the instances
-resource "null_resource" "keygen" {
-    provisioner "local-exec" {
-        command = "yes | ssh-keygen -N '' -b 2048 -t rsa -f nomad-key.pem"
-    }
-}
-
 # Register our new key pair using the public key
 resource "aws_key_pair" "nomad-key" {
-  depends_on = ["null_resource.keygen"]
   key_name = "nomad-key"
   public_key = "${file("nomad-key.pem.pub")}"
 }

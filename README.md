@@ -197,6 +197,8 @@ can spin up the cluster with Terraform:
 ```
 $ cd tf/
 
+$ yes | ssh-keygen -N '' -b 2048 -t rsa -f nomad-key.pem
+
 $ terraform plan
 Refreshing Terraform state in-memory prior to plan...
 The refreshed state will be used to calculate this plan, but
@@ -233,6 +235,8 @@ At this point, we have a Nomad cluster running in AWS with our `transcode` job r
 We can now submit many input files to be converted:
 
 ```
+$ cd ../
+
 $ ./bin/dispatch.sh samples/many.txt
 Input file: http://s3.amazonaws.com/akamai.netstorage/HD_downloads/Orion_SM.mp4
 Dispatched Job ID = transcode/dispatch-1486005726-0d20aa76
