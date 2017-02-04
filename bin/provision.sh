@@ -29,12 +29,12 @@ sudo rm /usr/bin/ffmpeg
 sudo cp /opt/ffmpeg/bin/ffmpeg /usr/bin/ffmpeg
 
 # Install the datadog agent
-if [ $DD_API_KEY != "" ]; then
+if [ ! -z $DD_API_KEY ]; then
     bash -c "$(curl -L https://raw.githubusercontent.com/DataDog/dd-agent/master/packaging/datadog-agent/source/install_agent.sh)"
 fi
 
 # Download the latest build of Nomad
-wget -O /tmp/nomad.zip "https://releases.hashicorp.com/nomad/0.5.4/nomad_0.5.4_linux_amd64.zip"
+wget -nv -O /tmp/nomad.zip "https://releases.hashicorp.com/nomad/0.5.4/nomad_0.5.4_linux_amd64.zip"
 
 # Unzip and install nomad
 unzip /tmp/nomad.zip

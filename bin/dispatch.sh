@@ -3,7 +3,7 @@ set -e
 
 # Ensure we have at least an input file
 if [ $# -eq 0 ]; then
-    echo "Usage: provision.sh <input file>"
+    echo "Usage: dispatch.sh <input file>"
     exit 1
 fi
 
