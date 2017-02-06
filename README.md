@@ -33,22 +33,25 @@ and provide the AWS credentials to upload to S3.
 
 Inside the job file, we will see the following sections:
 
-```
+```hcl
 job "transcode" {
-    ...
-    env {
-        S3_BUCKET = "BUCKET_NAME"
-    }
-    ...
-    template {
-        destination = "local/s3cfg.ini"
-        data        = <<EOH
+  # ...
+    
+  env {
+    S3_BUCKET = "BUCKET_NAME"
+  }
+
+  # ...
+
+  template {
+    destination = "local/s3cfg.ini"
+    data        = <<EOH
 [default]
 access_key = "ACCESS_KEY"
 secret_key = "SECRET_KEY"
 EOH
-    }
-...
+  }
+}
 ```
 
 We need to replace `BUCKET_NAME` with the name of the actual S3 bucket to upload to,
