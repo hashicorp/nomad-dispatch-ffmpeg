@@ -7,6 +7,8 @@ feature called [parameterized
 jobs](https://www.nomadproject.io/docs/job-specification/parameterized.html),
 which act like a function definition and can be invoked with arguments.
 
+For a detailed guide and background information, please see the **[Scalable Video Transcoding with Nomad Dispatch and ffmpeg blog post](https://www.hashicorp.com/blog/scalable-video-transcoding-with-nomad-dispatch-and-ffmpeg.html)**.
+
 In this demo, we define a `transcode` parameterized job, which takes a required
 `input` video file and an optional `profile` to control the video transcoding
 mode. The input video can be a link to an MP4 file, and the profile is either
