@@ -1,8 +1,18 @@
 # Nomad Dispatch + ffmpeg video transcoding
 
-This repository demonstrates using the new [Nomad Dispatch](https://www.nomadproject.io/docs/commands/job-dispatch.html) features to build a scalable video transcoding service. Nomad dispatch makes use of a feature called [parameterized jobs](https://www.nomadproject.io/docs/job-specification/parameterized.html), which act like a function definition and can be invoked with arguments.
+This repository demonstrates using [Nomad
+Dispatch](https://www.nomadproject.io/docs/commands/job-dispatch.html) features
+to build a scalable video transcoding service. Nomad dispatch makes use of a
+feature called [parameterized
+jobs](https://www.nomadproject.io/docs/job-specification/parameterized.html),
+which act like a function definition and can be invoked with arguments.
 
-In this demo, we define a `transcode` parameterized job, which takes a required `input` video file and an optional `profile` to control the video transcoding mode. The input video can be a link to an MP4 file, and the profile is either "small" for a 480p output, or "large" for a 720p output. The job file itself can be found in the nomad directory, and is very simple. The `parameterized` block is what changes the behavior from a standard Nomad job.
+In this demo, we define a `transcode` parameterized job, which takes a required
+`input` video file and an optional `profile` to control the video transcoding
+mode. The input video can be a link to an MP4 file, and the profile is either
+"small" for a 480p output, or "large" for a 720p output. The job file itself can
+be found in the nomad directory, and is very simple. The `parameterized` block
+is what changes the behavior from a standard Nomad job.
 
 To make use of the parameterized job, we invoke dispatch with our arguments:
 
@@ -19,13 +29,20 @@ Evaluation ID     = e33db4b6
 ```
 
 Each time we dispatch a parameterized job, we create a new job with a unique ID.
-This is similar to a future or promise in many programming languages, and allows us to track the status of a given invocation.
+This is similar to a future or promise in many programming languages, and allows
+us to track the status of a given invocation.
 
-Our transcode service ultimately invokes `bin/transcode.sh`. When it is called, the input file is downloaded, the MD5 is computed, ffmpeg is used to transcode, and the converted output is uploaded to S3 for storage. The transcode script supports a "small" and "large" profile, which convert files to 480p or 720p respectively.
+Our transcode service ultimately invokes `bin/transcode.sh`. When it is called,
+the input file is downloaded, the MD5 is computed, ffmpeg is used to transcode,
+and the converted output is uploaded to S3 for storage. The transcode script
+supports a "small" and "large" profile, which convert files to 480p or 720p
+respectively.
 
-To test the transcode service, we can either use [Vagrant](https://www.vagrantup.com) locally or [Terraform](https://www.terraform.io) to spin up an AWS cluster.
+To test the transcode service, we can either use
+[Vagrant](https://www.vagrantup.com) locally or
+[Terraform](https://www.terraform.io) to spin up an AWS cluster.
 
-# Transcode Job Setup
+## Transcode Job Setup
 
 Before using either Vagrant or Terraform to test our cluster, we need to configure the Nomad job.
 The job is provided at `nomad/transcode.nomad`, however we must configure the S3 bucket to upload to
@@ -36,9 +53,9 @@ Inside the job file, we will see the following sections:
 ```hcl
 job "transcode" {
   # ...
-    
+
   env {
-    S3_BUCKET = "BUCKET_NAME"
+    "S3_BUCKET" = "BUCKET_NAME"
   }
 
   # ...
@@ -54,19 +71,23 @@ EOH
 }
 ```
 
-We need to replace `BUCKET_NAME` with the name of the actual S3 bucket to upload to,
-and `ACCESS_KEY` and `SECRET_KEY` with credentials that have permission to use that bucket.
+We need to replace `BUCKET_NAME` with the name of the actual S3 bucket to upload
+to, and `ACCESS_KEY` and `SECRET_KEY` with credentials that have permission to
+use that bucket.
 
-**Caveats**:
-For the sake of simplicity, we can hard code the credentials, however in a real world scenario
-we would use [Vault](https://www.vaultproject.io) to store the credentials and use Nomad's
-[template integration](https://www.nomadproject.io/docs/job-specification/template.html) to
-populate the values.
+### Caveats
 
-# Vagrant
+For the sake of simplicity, we can hard code the credentials, however in a real
+world scenario we would use [Vault](https://www.vaultproject.io) to acquire the
+credentials and use Nomad's [template
+integration](https://www.nomadproject.io/docs/job-specification/template.html)
+to populate the values.
 
-Using Vagrant we can setup a local virtual machine to test our transcoding service.
-Assuming Vagrant is installed already, the provided `Vagrantfile` will setup the VM and register our Nomad job:
+## Vagrant
+
+Using Vagrant we can setup a local virtual machine to test our transcoding
+service. Assuming Vagrant is installed already, the provided `Vagrantfile` will
+setup the VM and register our Nomad job:
 
 ```
 $ vagrant up
@@ -85,12 +106,12 @@ Bringing machine 'default' up with 'vmware_fusion' provider...
 ==> default: Job registration successful
 ```
 
-At this point, we should have a Vagrant VM running with Nomad setup and our `transcode` job registered.
-We can verify this is the case:
+At this point, we should have a Vagrant VM running with Nomad setup and our
+`transcode` job registered. We can verify this is the case:
 
 ```
 $ vagrant ssh
-...
+# ...
 
 $ nomad status
 ID         Type   Priority  Status
@@ -122,7 +143,7 @@ To attempt transcoding, we can use the provided samples:
 
 ```
 $ vagrant ssh
-...
+# ...
 
 $ cd /vagrant/
 
@@ -158,7 +179,10 @@ transcode/dispatch-1486005726-0d20aa76  running
 transcode/dispatch-1486005726-6671c576  running
 ```
 
-Here we can see that we've dispatched two jobs, both are processing the same input file, one for the "small" profile and one for the "large" profile. We can use the standard Nomad commands to inspect and monitor those jobs, as they are regular batch jobs.
+Here we can see that we've dispatched two jobs, both are processing the same
+input file, one for the "small" profile and one for the "large" profile. We can
+use the standard Nomad commands to inspect and monitor those jobs, as they are
+regular batch jobs.
 
 We can cleanup using Vagrant:
 
@@ -171,12 +195,13 @@ $ vagrant destroy
 
 Don't forget to delete the output files in S3 to avoid being charged.
 
-# Terraform
+## Terraform
 
-Using Terraform we can setup a remote AWS cluster to test our transcoding service.
-This allows us to scale up the number of Nomad nodes to increase the total transcoding throughput.
-Assuming Terraform and Nomad are installed locally, we must configure Terraform by creating a file
-at `tf/terraform.tfvars`:
+Using Terraform we can setup a remote AWS cluster to test our transcoding
+service. This allows us to scale up the number of Nomad nodes to increase the
+total transcoding throughput. Assuming Terraform and Nomad are installed
+locally, we must configure Terraform by creating a file at
+`tf/terraform.tfvars`:
 
 ```
 # Configure Datadog API keys
@@ -191,11 +216,12 @@ aws_secret_key = "HZFm..."
 client_count = 2
 ```
 
-We are using [Datadog](http://datadoghq.com) to monitor the queue depth of pending jobs.
-This gives us visibility into how busy our cluster is, and if we need to add more Nomad nodes
-to scale up our processing throughput. We use AWS to spin up a simple Nomad cluster, with a single
-server, and a variable number of clients (defaulting to 1). Once we've setup our variables, we
-can spin up the cluster with Terraform:
+We are using [Datadog](https://www.datadoghq.com) to monitor the queue depth of
+pending jobs. This gives us visibility into how busy our cluster is, and if we
+need to add more Nomad nodes to scale up our processing throughput. We use AWS
+to spin up a simple Nomad cluster, with a single server, and a variable number
+of clients (defaulting to 1). Once we've setup our variables, we can spin up the
+cluster with Terraform:
 
 ```
 $ cd tf/
@@ -234,8 +260,8 @@ ID                                      Type   Priority  Status
 transcode                               batch  50        running
 ```
 
-At this point, we have a Nomad cluster running in AWS with our `transcode` job registered.
-We can now submit many input files to be converted:
+At this point, we have a Nomad cluster running in AWS with our `transcode` job
+registered. We can now submit many input files to be converted:
 
 ```
 $ cd ../
@@ -285,22 +311,23 @@ Destroy complete! Resources: 19 destroyed.
 
 Don't forget to delete the output files in S3 to avoid being charged.
 
-**Caveats**:
+### Caveats
+
 Terraform is deploying the Nomad server to be accessible on the Internet with
 an insecure configuration. This makes it easy to demo the dispatch features,
 however in real world usage the Nomad servers should be accessible only via
 VPN or a bastion host.
 
 Additionally, for the sake of simplicity we are using provisioners to configure
-our AWS instances after launch. In practice, we would use [Packer](https://www.packer.io)
-to pre-bake AMIs that are already configured to reduce startup time and the risk
-of partial failures during setup.
+our AWS instances after launch. In practice, we would use
+[Packer](https://www.packer.io) to pre-bake AMIs that are already configured to
+reduce startup time and the risk of partial failures during setup.
 
-# Troubleshooting
+## Troubleshooting
 
 These examples use new features of many of the tools. At the time of writing,
 the following versions were used:
+
 * Terraform v0.8.5
 * Nomad v0.5.4
 * Vagrant v1.9.1
-

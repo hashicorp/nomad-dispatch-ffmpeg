@@ -3,12 +3,12 @@ set -e
 
 # Ensure we have at least an input file
 if [ $# -eq 0 ]; then
-    echo "Usage: transcode.sh <input file> <profile>"
-    exit 1
+  echo "Usage: transcode.sh <input file> <profile>"
+  exit 1
 fi
 
 # Setup the S3 defaults, allow overwrite
-BUCKET=${S3_BUCKET:-"armon-test-dispatch"}
+BUCKET=${S3_BUCKET:-"nomad-test-dispatch"}
 
 # Store the various profile configurations
 SMALL="-vf scale=640:-1 -c:v libx264 -preset medium -crf 30 -c:a aac -b:a 128k -profile:v high -level 4.0"
@@ -20,8 +20,8 @@ PROFILE_NAME="small"
 
 # Check for override
 if [ "$2" == "large" ]; then
-    PROFILE=$LARGE
-    PROFILE_NAME="large"
+  PROFILE=$LARGE
+  PROFILE_NAME="large"
 fi
 echo "Profile: ${PROFILE_NAME}"
 
@@ -31,15 +31,15 @@ echo "Input file: $INPUT"
 
 # Fetch the input file if via http(s)
 if [[ $INPUT == http* ]]; then
-    echo "Fetching input"
-    wget $INPUT -O input
-    INPUT="input"
+  echo "Fetching input"
+  wget $INPUT -O input
+  INPUT="input"
 fi
 
 # Check that the input file exists
 if [ ! -e $INPUT ]; then
-    echo "Missing input file!"
-    exit 1
+  echo "Missing input file!"
+  exit 1
 fi
 
 # Dump the MD5
@@ -52,11 +52,10 @@ echo "Output file: $OUT"
 
 # Only attempt conversion if the output file does not exist
 if [ ! -e $OUT ]; then
-	echo "Starting conversion"
-	ffmpeg -n -i $INPUT $PROFILE $OUT
-	echo "Conversion done"
+  echo "Starting conversion"
+  ffmpeg -n -i $INPUT $PROFILE $OUT
+  echo "Conversion done"
 fi
 
 # Upload to S3
 s3cmd put -c local/s3cfg.ini $OUT "s3://$BUCKET/videos/${OUT}"
-
